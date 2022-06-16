@@ -1,0 +1,11 @@
+Package: WBqueryR
+Title: Systematically query and download World Bank Microdata
+Version: 0.0.0.9000
+Authors@R: 
+    person("Mathias", "Weidinger", , "mathias.weidinger@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-8613-2367"))
+Description: `WBqueryR()` makes exploring and downloading data from the [World Bank Microdata Library](https://microdata.worldbank.org/index.php/home) easier from within R. The available items can be filtered and selected through user-defined search criteria. The custom function `WBquery()` is a wrapper for the World Bank’s own [Microdata API (v1.0.0)](https://microdata.worldbank.org/api-documentation/catalog/index.html#) that allows for intuitive use in the R language programming environment.
+License: use_gpl3_license()
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
