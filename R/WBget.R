@@ -65,22 +65,46 @@ WBget <- function(id){
     }
 }
 
-
-
-# How to use search criteria (ID does not work yet, inc_iso and lsms do work)
-
 library(httr)
 
 r <- GET("http://microdata.worldbank.org/index.php/api/catalog/search",
-         query = list(collection = "lsms", ID = 4322, inc_iso = TRUE))
+         query = list(inc_iso = TRUE, ps = 10000, dtype = "public"))
 
 status_code(r)
 
 str(content(r))
+(content(r)) -> cont
+cont$variables -> cont
+cont %<>% multi_join(join_func = rbind) %>% data.frame() %>% tibble()
+
+cont %>%
+    unnest(col = form_model) %>%
+    #If needed col1 as factors
+    #mutate(col1 =factor(col1)) %>%
+    count(form_model)
+
+r <- GET("http://microdata.worldbank.org/index.php/api/catalog/NGA_2018_GHSP-W4_v03_M/variables")
+
+cont$grepl <- grepl("longitude|latitude", cont$labl, ignore.case = TRUE)
+
+cont %>% filter(grepl == TRUE) -> expend_vars
 
 
-
-
-
-
-
+# public:     1. login
+#             2. fill form
+#             3. download csv
+#
+# open:       1. click "accept"
+#             2. download csv
+#
+# direct:     1. click "accept"
+#             2. download csv
+#
+# remote:     1. go to source
+#             2. login
+#             3. fill form
+#             4. download csv
+#
+# licensed:   1. login
+#             2. fill form
+#             3. download csv
