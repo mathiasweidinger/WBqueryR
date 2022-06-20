@@ -12,21 +12,22 @@ WBquery <- function(key = "",           # search keys
 
 
     # Load the package required to read JSON files.
-    require("rjson")
+    require(rjson)
 
-    # Load the package required for using double-pipe operator.
-    require("magrittr")
+    require(magrittr) # required for double and subset-pipe operators.
 
-    # Load the tidyverse suite of packages.
-    require("tidyverse")
+    require(tidyverse) # Load the tidyverse suite of packages.
 
-    # source multi-join
-    source("R/multi_join.R")
+    require(httr) # package to work with APIs
+
+    require(pbapply) # add a progress bar to lapply() calls
+
+    source("R/multi_join.R") # source custom function multi-join()
 
     # Process search criteria
 
     key <- ifelse(exists("key"),
-                  paste(key, collapse = ","), "")
+                  paste(key, collapse = "|"), "")
 
     from <- ifelse(exists("from"),
                    paste(from, collapse = ","), "")
@@ -50,8 +51,6 @@ WBquery <- function(key = "",           # search keys
 
     # first search for datasets in collections, countries and time frame
     # get their codebooks
-
-    require(httr) # package to work with APIs
 
     # set path for catalog search
     path_cat <- "http://microdata.worldbank.org/index.php/api/catalog/search"
@@ -78,9 +77,7 @@ WBquery <- function(key = "",           # search keys
         tibble %$% # build tibble
         idno # extract item names
 
-
-    require(pbapply) # add a progress bar to lapply() call
-
+    message("gathering codebooks; this might take a while...")
     # initiate list of codebooks
     item_vars <- items %>%
         pblapply(. %>%
@@ -93,39 +90,35 @@ WBquery <- function(key = "",           # search keys
             multi_join(join_func = rbind) %>%
             data.frame %>% tibble)
 
-    names(item_vars) <- unlist(items)
+    # assign idno as list item names
+    names(item_vars) = unlist(items)
 
-    return(item_vars)
+    item_vars %<>% lapply( . %>%
+        mutate(grepl = grepl(key, labl,ignore.case = TRUE)) %>%
+        filter(grepl == TRUE))
+
+    rmwac <- function(x) x[nrow(x) > 0]
+    do.call(rbind, lapply(item_vars, rmwac)) -> output
+
+    message("RESULTS:")
+    for (i in seq(1:nrow(output))){
+        message(paste0("Dataset ", rownames(output)[i], " contains the variable........ ", output$labl[i], sep = ""))
+    }
+
+
+    return(output)
 
 } # end of WBquery()
 
-
-
-
-#--------------------------------------------------------- TEST IT
-
-WBquery(country = c("malawi", "nigeria"), collection = c("lsms", "afrobarometer")) -> test
-
-
-#--------------------------------------------------------- NEXT CONTINUE WITH SEARCHING FOR THE KEYS
-
-# So far, the function searches for datasets that fit all criteria and downloads codebooks for them.
-# Next, we need to search that codebook for the sub-strings provided as search keys.
+item_vars <- WBquery(key = c("longitude", "latitude"),
+                     country = c("malawi", "nigeria"),
+                     collection = c("lsms", "afrobarometer"))
 
 
 
 
 
 
-
-
-# use grepl to find variables with labels that include the key words
-
-# cont$grepl <- grepl("longitude|latitude", cont$labl, ignore.case = TRUE)
-# cont %>% filter(grepl == TRUE) -> expend_vars
-#
-#
-#
 #
 #
 # public:     1. login
