@@ -22,7 +22,12 @@ WBquery <- function(key = "",           # search keys
 
     require(pbapply) # add a progress bar to lapply() calls
 
+    # require(future.apply) # parallelized apply functions
+
+    require(parallel) # distributed (parallel) computing
+
     source("R/multi_join.R") # source custom function multi-join()
+
 
     # Process search criteria
 
@@ -78,45 +83,61 @@ WBquery <- function(key = "",           # search keys
         idno # extract item names
 
     message("gathering codebooks; this might take a while...")
-    # initiate list of codebooks
-    item_vars <- items %>%
-        pblapply(. %>%
-        paste0("http://microdata.worldbank.org/index.php/api/catalog/",
-               .,
-               "/variables") %>%
-            GET %>%
-            content %$%
-            variables %>%
-            multi_join(join_func = rbind) %>%
-            data.frame %>% tibble)
 
-    # assign idno as list item names
-    names(item_vars) = unlist(items)
+    # set number of active cores for parallelization
+    detectCores() %>% makeCluster() -> cl # detect cores and make clusters
 
-    item_vars %<>% lapply( . %>%
-        mutate(grepl = grepl(key, labl,ignore.case = TRUE)) %>%
-        filter(grepl == TRUE))
+    # load required packages for each cluster
+    clusterEvalQ(cl, {
+        require(httr)
+        require(magrittr)
+        require(pbapply)
+        require(tidyverse)
+        source("R/multi_join.R")
+        })
 
-    rmwac <- function(x) x[nrow(x) > 0]
-    do.call(rbind, lapply(item_vars, rmwac)) -> output
+    # download codebooks
 
-    message("RESULTS:")
-    for (i in seq(1:nrow(output))){
-        message(paste0("Dataset ", rownames(output)[i], " contains the variable........ ", output$labl[i], sep = ""))
-    }
+    item_vars <- items
+    names(item_vars) <- unlist(items)
 
+    item_vars %<>% # start with list of codebooks
+        pblapply(. %>% # start parallelized task: for each item...
+            paste0("http://microdata.worldbank.org/index.php/api/catalog/",
+                   .,
+                   "/variables") %>% # paste URL path for API
+            GET %>% # get codebooks from API
+            content %$% # extract content from JSON response file
+            variables %>% # select column "variables"
+            multi_join(join_func = rbind) %>% # "multi-join" custom function
+            data.frame %>% tibble %>% # save output as a listed tibble
+            mutate(grepl = grepl(key, # search for key words in each tibble
+                labl,ignore.case = TRUE)) %>% # ignore cases
+            filter(.$grepl == TRUE) %>%  # drop variables that do not match keys
+            select(., -grepl), # drop helper variable from tibbles
+            cl = cl) %>% # set parallel clusters, end of parallelized task
+        keep(., ~nrow(.) > 0) # drop empty tibbles
 
-    return(output)
+    stopCluster(cl) # switch off clusters
+
+    return(item_vars) # give output
 
 } # end of WBquery()
 
-item_vars <- WBquery(key = c("longitude", "latitude"),
-                     country = c("malawi", "nigeria"),
-                     collection = c("lsms", "afrobarometer"))
+
+item_vars <- WBquery(key = c("aggregate", "consumption"),
+                     country = c("malawi", "nigeria", "ghana", "niger", "rwanda"),
+                     collection = c("lsms", "afrobarometer"),
+                     sort_by = c("rank"), sort_order = c("asc")
+                     )
 
 
+        message("RESULTS:")
 
-
+for (i in seq(1:nrow(output))){
+    message(paste0(rownames(output)[i], " contains the variable........ ",
+                   output$labl[i], sep = "" ))
+}
 
 
 #
