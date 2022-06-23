@@ -1,10 +1,9 @@
-
 # initiate WBquery()
 WBquery <- function(key = "",           # search keys
                     from = "",          # start year of data collection (Integer)
                     to = "",            # end year of data collection (Integer)
                     country = "",       # country name(s) or iso3 codes
-                    collection = "",    # collection id
+                    collection = "lsms",# collection id
                     access = "",        # type of access rights
                     sort_by = "",       # c("rank","title","nation","year")
                     sort_order =""      # c("asc","desc")
@@ -120,24 +119,41 @@ WBquery <- function(key = "",           # search keys
 
     stopCluster(cl) # switch off clusters
 
+
+    wanna_read <- readline(  # ask whether to print or not
+        prompt = "Done! Should I print the results? (type y for YES, n for NO):"
+        )
+
+    if (grepl(pattern = "y", wanna_read, ignore.case = TRUE) == TRUE){
+
+        # if yes...
+        message("RESULTS:")
+        for (i in seq(1:length(item_vars))){ # ...print the name of each dataset
+
+            message("")
+
+            message(paste0(names(item_vars)[i], " contains the variable(s):"))
+
+            #...followed by each variable in it that matches search criteria
+
+            for (v in 1:length(item_vars[[i]]$labl)){
+                message(paste0("     - ",
+                               item_vars[[i]]$name[v],
+                               " (", item_vars[[i]]$labl[v],")"))
+            }
+        }
+    }
+    else{
+        Sys.sleep(time = 1) # else do nothing
+    }
     return(item_vars) # give output
 
 } # end of WBquery()
 
-
-item_vars <- WBquery(key = c("aggregate", "consumption"),
-                     country = c("malawi", "nigeria", "ghana", "niger", "rwanda"),
-                     collection = c("lsms", "afrobarometer"),
-                     sort_by = c("rank"), sort_order = c("asc")
-                     )
+item_vars <- WBquery(key = c("per capita consumption"))
 
 
-        message("RESULTS:")
 
-for (i in seq(1:nrow(output))){
-    message(paste0(rownames(output)[i], " contains the variable........ ",
-                   output$labl[i], sep = "" ))
-}
 
 
 #
