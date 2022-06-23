@@ -9,6 +9,8 @@ WBquery <- function(key = "",           # search keys
                     sort_order =""      # c("asc","desc")
                     ){
 
+    # key = c("per capita consumption")
+    # collection = c("lsms")
 
     # Load the package required to read JSON files.
     require(rjson)
@@ -59,7 +61,7 @@ WBquery <- function(key = "",           # search keys
     # set path for catalog search
     path_cat <- "http://microdata.worldbank.org/index.php/api/catalog/search"
 
-    r <- GET(path_cat,
+    request <- GET(path_cat,
              query = list(from = from,
                           to = to,
                           country = country,
@@ -71,15 +73,15 @@ WBquery <- function(key = "",           # search keys
                           sort_order = sort_order))
 
     # check whether call was successful (200 = success)
-    status_code(r)
+    status_code(request)
 
     # reshape to get content
-    r %<>% content %$% result %$% rows
+    text <- httr::content(request, "text", encoding="UTF-8")
+    data <- jsonlite::fromJSON(text)
 
-    # collect names of relevant studies
-    items <- as.data.frame(do.call(rbind, r)) %>% # collapse list
-        tibble %$% # build tibble
-        idno # extract item names
+
+    data %$% result %$% rows %>% tibble %$% # build tibble
+        idno -> items # extract item names
 
     message("gathering codebooks; this might take a while...")
 
