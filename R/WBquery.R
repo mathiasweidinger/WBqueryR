@@ -6,7 +6,8 @@ WBquery <- function(key = "",           # search keys
                     collection = "lsms",# collection id
                     access = "",        # type of access rights
                     sort_by = "",       # c("rank","title","nation","year")
-                    sort_order =""      # c("asc","desc")
+                    sort_order = "",    # c("asc","desc")
+                    accuracy = 0.5      # set search accuracy (vsm score limit)
                     ){
 
     # key = c("per capita consumption")
@@ -14,6 +15,8 @@ WBquery <- function(key = "",           # search keys
 
     # Load the package required to read JSON files.
     require(rjson)
+
+    require(tm)
 
     require(magrittr) # required for double and subset-pipe operators.
 
@@ -29,6 +32,7 @@ WBquery <- function(key = "",           # search keys
 
     source("R/multi_join.R") # source custom function multi-join()
 
+    source("R/vsm_score.R") # source custom scoring function
 
     # Process search criteria
 
@@ -83,8 +87,6 @@ WBquery <- function(key = "",           # search keys
     data %$% result %$% rows %>% tibble %$% # build tibble
         idno -> items # extract item names
 
-    message("gathering codebooks; this might take a while...")
-
     # set number of active cores for parallelization
     detectCores() %>% makeCluster() -> cl # detect cores and make clusters
 
@@ -95,9 +97,12 @@ WBquery <- function(key = "",           # search keys
         require(pbapply)
         require(tidyverse)
         source("R/multi_join.R")
+        source("R/vsm_score.R")
         })
 
     # download codebooks
+
+    message("gathering codebooks...")
 
     item_vars <- items
     names(item_vars) <- unlist(items)
@@ -111,16 +116,13 @@ WBquery <- function(key = "",           # search keys
             content %$% # extract content from JSON response file
             variables %>% # select column "variables"
             multi_join(join_func = rbind) %>% # "multi-join" custom function
-            data.frame %>% tibble %>% # save output as a listed tibble
-            mutate(grepl = grepl(key, # search for key words in each tibble
-                labl,ignore.case = TRUE)) %>% # ignore cases
-            filter(.$grepl == TRUE) %>%  # drop variables that do not match keys
-            select(., -grepl), # drop helper variable from tibbles
-            cl = cl) %>% # set parallel clusters, end of parallelized task
-        keep(., ~nrow(.) > 0) # drop empty tibbles
+            data.frame %>% tibble, cl = cl) # set parallel clusters, end of parallelized task
+
+    message("scoring for key words...")
+    item_vars %>% pblapply(. %>% vsm_score(. , query = key, accuracy = accuracy), cl = cl) %>%
+        keep(., ~nrow(.) > 0) -> scores # drop empty tibbles
 
     stopCluster(cl) # switch off clusters
-
 
     wanna_read <- readline(  # ask whether to print or not
         prompt = "Done! Should I print the results? (type y for YES, n for NO):"
@@ -130,29 +132,31 @@ WBquery <- function(key = "",           # search keys
 
         # if yes...
         message("RESULTS:")
-        for (i in seq(1:length(item_vars))){ # ...print the name of each dataset
+        for (i in seq(1:length(scores))){ # ...print the name of each dataset
 
             message("")
 
-            message(paste0(names(item_vars)[i], " contains the variable(s):"))
+            message(paste0(names(scores)[i], " contains the variable(s):"))
 
             #...followed by each variable in it that matches search criteria
 
-            for (v in 1:length(item_vars[[i]]$labl)){
-                message(paste0("     - ",
-                               item_vars[[i]]$name[v],
-                               " (", item_vars[[i]]$labl[v],")"))
+            for (v in 1:length(scores[[i]]$text)){
+                message(paste0("    ",round(scores[[i]]$score[v], digits = 2)," - ",
+                               scores[[i]]$doc[v],
+                               " (", scores[[i]]$text[v],")"))
             }
         }
     }
     else{
         Sys.sleep(time = 1) # else do nothing
     }
-    return(item_vars) # give output
+    #return(item_vars) # give output
 
 } # end of WBquery()
 
-item_vars <- WBquery(key = c("per capita consumption"))
+item_vars <- WBquery(key = c("per capita consumption"),
+                     country = c("malawi", "nigeria"),
+                     accuracy = 0.85)
 
 
 
