@@ -4,22 +4,61 @@
 \alias{WBquery}
 \title{WBquery}
 \usage{
-WBquery(dest, key, iso, col)
+WBquery(
+  key = "",
+  from = "",
+  to = "",
+  country = "",
+  collection = "lsms",
+  access = "",
+  sort_by = "",
+  sort_order = "",
+  accuracy = 0.5
+)
 }
 \arguments{
-\item{dest}{File destination (default is current working directory)}
+\item{key}{REQUIRED: a character vector of key words; e.g. \code{c("income", "region", "child")}.}
 
-\item{key}{A vector of keywords used in the quary}
+\item{from}{OPTIONAL: start year of data collection (Integer).}
 
-\item{iso}{Iso Alpha 3 country codes in capital letters (ABW, AFG, AGO,...)}
+\item{to}{OPTIONAL: end year of data collection (Integer).}
 
-\item{col}{ID of one or more World Bank Microdata Library collection(s). There are 23 choices: \code{c("afrobarometer", "datafirst","dime", "microdata_rg", "enterprise_surveys", "FCV", "global-findex", "ghdx", "hfps", "impact_evaluation", "ipums", "lsms", "dhs", "mrs", "MCC", "pets", "sdi", "step", "sief", "COS", "MICS", "unhcr", "WHO")}.}
+\item{country}{OPTIONAL: a character vector of country name(s) or iso3 codes or a mix of both; e.g. \code{c("malawi", "nga", "peru", "vnm")}}
 
-\item{out}{One of \code{c("search", "get")}}
+\item{collection}{OPTIONAL: a character vector including one or more of the WB microdata library collection ID codes. Defaults to \code{"lsms"} when left unspecified.}
+
+\item{access}{OPTIONAL: an optional character vector indicating the desired type(s) of access rights; one or more of \code{c("open", "public","direct","remote","licensed")}}
+
+\item{sort_by}{OPTIONAL: one of \code{c("rank","title","nation","year")}}
+
+\item{sort_order}{OPTIONAL: indicate direction of sorting as ascending or descending; one of \code{c("asc","desc")}}
+
+\item{accuracy}{OPTIONAL: desired level of scoring accuracy (a real number between 0 and 1); e.g. \code{0.75} to limit results to scores greater or equal to 75\% accuracy. Defaults to \code{0.5} when left unspecified.}
 }
 \value{
-If \code{out = "search"}, \code{WBquery()} returns a list of items that match the search criteria. If \code{out = "get"}, \code{WBquery()} downloads all items that match the serach criteria to the current working directory, or the directory specified by \code{dest}.
+\code{WBquery()} returns a nested list of results by key word, each consisting of tibbles that contain the library items' unique identifier (idno), matching variables, their labels and matching scores.
 }
 \description{
-WBquery
+A custom function that queries the World Bank's Micro Data Library catalogue for items, according to search criteria specified by the user.
+}
+\details{
+\code{Wbquery()} conveniently combines two independent processes. Firstly, it is a wrapper for the World Bank's \href{https://microdata.worldbank.org/api-documentation/catalog/index.html}{Microdata Library API}, which it uses to download codebooks of the studies listed in the library's catalogue. In a second step, \code{WBquery()} implements a basic search engine that takes the variable labels, obtained from codebooks through the API, as input and scores them for the presence of user-specified key words. The underlying algorithm is a simple \href{https://en.wikipedia.org/wiki/Vector_space_model}{vector-space-model}. The helper function \code{vsm_score} is internally called to implement the vector-space-model. It is broadly based on multiple online tutorials, some of which can be found \href{https://rpubs.com/ftoresh/search-engine-Corpus}{here}, \href{https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/}{here}, and \href{https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005}{here}.
+
+The specificity or "accuracy" of the results can be specified by the user, indicating an accuracy threshold between 0 and 1. All results with a matching score below the indicated threshold are discarded from the final output. The user needs to consider the following trade-off between quality and quantity of the search results. A higher accuracy threshold yields fewer results, but they are likely to be relevant to the user's query. A lower threshold generally yields more results, but they will probably be less relevant to the user's query. It is recommended to experiment with varying degrees of matching accuracy by adjusting the threshold and repeating the same search multiple times to get an idea of the variation implied. In particular, if a certain key word returns zero results, one potential solution is to be "less picky" and try again with a lower threshold.
+}
+\examples{
+# look for variable(s) called "total consumption", which...
+# ... were collected between 2000 and 2019,
+# ... form part of data from nigeria, south africa, or vietnam,
+# ... are open access or public.
+# ... only accept matching scores of 60\% and above
+
+example <- WBquery(
+               key = c("total consumption"),
+               from = 2000,
+               to = 2019,
+               country = c("nigeria", "zaf", "vnm"),
+               access = c("open", "public"),
+               accuracy = 0.6
+           )
 }

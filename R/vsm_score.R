@@ -1,5 +1,4 @@
-
-vsm_score <- function(df, query, accuracy){
+vsm_score <- function(df, query, accuracy = 0.5){
 
     require(tm)
     require(dplyr)
@@ -46,11 +45,9 @@ vsm_score <- function(df, query, accuracy){
     tfidf.matrix <- t(apply(term.doc.matrix, 1,
                             FUN = function(row) {get.tf.idf.weights(row)}))
     colnames(tfidf.matrix) <- colnames(term.doc.matrix)
-    tfidf.matrix[0:3, ]
 
     tfidf.matrix <- scale(tfidf.matrix, center = FALSE,
                           scale = sqrt(colSums(tfidf.matrix^2)))
-    tfidf.matrix[0:3, ]
 
     query.vector <- tfidf.matrix[, (N.labels + 1)]
     tfidf.matrix <- tfidf.matrix[, 1:N.labels]
@@ -61,9 +58,8 @@ vsm_score <- function(df, query, accuracy){
 
     results.df <- results.df[order(results.df$score, decreasing = TRUE), ]
 
-    # filter out
 
-    results.df %>% filter(score >= accuracy) -> scores
+    results.df %>% filter(score >= accuracy) -> scores    # filter out
 
     return(scores)
 }
