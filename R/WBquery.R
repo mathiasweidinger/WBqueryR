@@ -21,6 +21,12 @@
 #' @return `WBquery()` returns a nested list of results by key word, each consisting of tibbles that contain the library items' unique identifier (idno), matching variables, their labels and matching scores.
 #' @export
 #'
+#' @import dplyr tm pbapply httr parallel jsonlite
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %$%
+#' @importFrom magrittr %<>%
+#' @importFrom purrr keep
+#'
 #' @examples
 #' \dontrun{
 #' # look for variable(s) called "total consumption", which...
@@ -51,24 +57,23 @@ WBquery <- function(key = "",           # search keys
                     ){
 
 
-    require(rjson) # to read JSON files
-
-    require(tm) # text mining
-
-    require(magrittr) # required for double and subset-pipe operators.
-
-    require(tidyverse) # Load the tidyverse suite of packages.
-
-    require(httr) # package to work with APIs
-
-    require(pbapply) # add a progress bar to lapply() calls
-
-    require(parallel) # distributed (parallel) computing
-
-    # Define multiple join function.
+    # require(rjson) # to read JSON files
+    #
+    # require(tm) # text mining
+    #
+    # require(magrittr) # required for double and subset-pipe operators.
+    #
+    # require(tidyverse) # Load the tidyverse suite of packages.
+    #
+    # require(httr) # package to work with APIs
+    #
+    # require(pbapply) # add a progress bar to lapply() calls
+    #
+    # require(parallel) # distributed (parallel) computing
+    #
+    # # Define multiple join function.
 
     multi_join <- function(list_of_loaded_data, join_func){
-        # require("dplyr")
         output <- Reduce(function(x, y) {join_func(x, y)}, list_of_loaded_data)
         return(output)
     }
@@ -77,37 +82,33 @@ WBquery <- function(key = "",           # search keys
 
     vsm_score <- function(df, query, accuracy = 0.5){
 
-        require(tm)
-        require(dplyr)
+        # require(tm)
+        # require(dplyr)
 
         df %$% labl -> labels
         names(labels) <- df$name
         N.labels <- length(labels)
 
-        my.docs <- VectorSource(c(labels, query))
+        my.docs <- tm::VectorSource(c(labels, query))
         my.docs$Names <- c(names(labels), "query")
 
-        my.corpus <- Corpus(my.docs)
+        my.corpus <- tm::Corpus(my.docs)
         my.corpus
 
         #remove punctuation
-        my.corpus <- tm_map(my.corpus, removePunctuation)
+        my.corpus <- tm::tm_map(my.corpus, removePunctuation)
 
         #remove numbers, uppercase, additional spaces
-        my.corpus <- tm_map(my.corpus, removeNumbers)
-        my.corpus <- tm_map(my.corpus, content_transformer(tolower))
-        my.corpus <- tm_map(my.corpus, stripWhitespace)
+        my.corpus <- tm::tm_map(my.corpus, tm::removeNumbers)
+        my.corpus <- tm::tm_map(my.corpus, tm::content_transformer(tolower))
+        my.corpus <- tm::tm_map(my.corpus, tm::stripWhitespace)
 
         #create document matrix in a format that is efficient
-        term.doc.matrix.stm <- TermDocumentMatrix(my.corpus)
+        term.doc.matrix.stm <- tm::TermDocumentMatrix(my.corpus)
         colnames(term.doc.matrix.stm) <- c(names(labels), "query")
 
         #compare number of bytes of normal matrix against triple matrix format
         term.doc.matrix <- as.matrix(term.doc.matrix.stm)
-
-        # cat("Dense matrix representation costs", object.size(term.doc.matrix), "bytes.\n",
-        #     "Simple triplet matrix representation costs", object.size(term.doc.matrix.stm),
-        #     "bytes.")
 
         #constructing the Vector Space Model
         get.tf.idf.weights <- function(tf.vec) {
@@ -171,7 +172,7 @@ WBquery <- function(key = "",           # search keys
     # set path for catalog search
     path_cat <- "http://microdata.worldbank.org/index.php/api/catalog/search"
 
-    request <- GET(path_cat,
+    request <- httr::GET(path_cat,
              query = list(from = from,
                           to = to,
                           country = country,
@@ -183,7 +184,7 @@ WBquery <- function(key = "",           # search keys
                           sort_order = sort_order))
 
     # check whether call was successful (200 = success)
-    status_code(request)
+    httr::status_code(request)
 
     # reshape to get content
     text <- httr::content(request, "text", encoding="UTF-8")
@@ -194,24 +195,82 @@ WBquery <- function(key = "",           # search keys
         idno -> items # extract item names
 
     # set number of active cores for parallelization
-    detectCores() %>% makeCluster() -> cl # detect cores and make clusters
+    parallel::detectCores() %>% parallel::makeCluster() -> cl # detect cores and make clusters
 
-    # load required packages for each cluster
-    clusterEvalQ(cl, {
-        require(httr)
-        require(magrittr)
-        require(pbapply)
-        require(tidyverse)
+    # prep each cluster
+    parallel::clusterEvalQ(cl, {
 
         # Define multiple join function.
 
         multi_join <- function(list_of_loaded_data, join_func){
-            require("dplyr")
             output <- Reduce(function(x, y) {join_func(x, y)}, list_of_loaded_data)
             return(output)
         }
 
-        source("R/vsm_score.R")
+        # Define vsm_score function.
+
+        vsm_score <- function(df, query, accuracy = 0.5){
+
+            # require(tm)
+            # require(dplyr)
+
+            df %$% labl -> labels
+            names(labels) <- df$name
+            N.labels <- length(labels)
+
+            my.docs <- tm::VectorSource(c(labels, query))
+            my.docs$Names <- c(names(labels), "query")
+
+            my.corpus <- tm::Corpus(my.docs)
+            my.corpus
+
+            #remove punctuation
+            my.corpus <- tm::tm_map(my.corpus, removePunctuation)
+
+            #remove numbers, uppercase, additional spaces
+            my.corpus <- tm::tm_map(my.corpus, tm::removeNumbers)
+            my.corpus <- tm::tm_map(my.corpus, tm::content_transformer(tolower))
+            my.corpus <- tm::tm_map(my.corpus, tm::stripWhitespace)
+
+            #create document matrix in a format that is efficient
+            term.doc.matrix.stm <- tm::TermDocumentMatrix(my.corpus)
+            colnames(term.doc.matrix.stm) <- c(names(labels), "query")
+
+            #compare number of bytes of normal matrix against triple matrix format
+            term.doc.matrix <- as.matrix(term.doc.matrix.stm)
+
+            #constructing the Vector Space Model
+            get.tf.idf.weights <- function(tf.vec) {
+                # Compute tfidf weights from term frequency vector
+                n.docs <- length(tf.vec)
+                doc.frequency <- length(tf.vec[tf.vec > 0])
+                weights <- rep(0, length(tf.vec))
+                weights[tf.vec > 0] <- (1 + log2(tf.vec[tf.vec > 0])) * log2(n.docs/doc.frequency)
+                return(weights)
+            }
+
+            tfidf.matrix <- t(apply(term.doc.matrix, 1,
+                                    FUN = function(row) {get.tf.idf.weights(row)}))
+            colnames(tfidf.matrix) <- colnames(term.doc.matrix)
+
+            tfidf.matrix <- scale(tfidf.matrix, center = FALSE,
+                                  scale = sqrt(colSums(tfidf.matrix^2)))
+
+            query.vector <- tfidf.matrix[, (N.labels + 1)]
+            tfidf.matrix <- tfidf.matrix[, 1:N.labels]
+
+            doc.scores <- t(query.vector) %*% tfidf.matrix
+
+            results.df <- tibble(doc = names(labels), score = t(doc.scores),text = labels)
+
+            results.df <- results.df[order(results.df$score, decreasing = TRUE), ]
+
+
+            results.df %>% filter(score >= accuracy) -> scores    # filter out
+
+            return(scores)
+        }
+
         })
 
     # download codebooks
@@ -240,14 +299,14 @@ WBquery <- function(key = "",           # search keys
         message(paste0("scoring for key word ",k, "/", length(key),
                        " (", key[k],")..."))
 
-        item_vars %>% pblapply(. %>% vsm_score(. , query = key[k],
+        item_vars %>% pbapply::pblapply(. %>% vsm_score(. , query = key[k],
                                                accuracy = accuracy),
                                cl = cl) %>%
-            keep(., ~nrow(.) > 0) -> scores[[k]] # drop empty tibbles
+            purrr::keep(., ~nrow(.) > 0) -> scores[[k]] # drop empty tibbles
     }
 
 
-    stopCluster(cl) # switch off clusters
+    parallel::stopCluster(cl) # switch off clusters
 
     wanna_read <- readline(  # ask whether to print or not
         prompt = "Search complete! Print results in the console? (type y for YES, n for NO):"
