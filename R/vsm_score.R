@@ -1,3 +1,16 @@
+#' vsm_score
+#'
+#' This is a helper function. Called internally by `WBquery()`, it implements a search engine for text documents based on a simple [vector-space-model](https://en.wikipedia.org/wiki/Vector_space_model). It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+#'
+#' @param df a dataframe including text documents to be used as search corpora
+#' @param query a string of key words to be searched for
+#' @param accuracy an accuracy threshold. Results with matching scores lower than this threshold will be discarded.
+#'
+#' @return This function returns a list of items that correspond to the search keys. Each one includes dataf rames of those documents from the corpora that have a matching score at or above the accuracy threshold, as well as information on the variable associated and its location inside the Microdata Library.
+#' @export
+#'
+#'
+#' @examples # No examples are provided for this helper function.
 vsm_score <- function(df, query, accuracy = 0.5){
 
     require(tm)

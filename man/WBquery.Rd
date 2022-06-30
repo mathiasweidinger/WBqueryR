@@ -47,6 +47,7 @@ A custom function that queries the World Bank's Micro Data Library catalogue for
 The specificity or "accuracy" of the results can be specified by the user, indicating an accuracy threshold between 0 and 1. All results with a matching score below the indicated threshold are discarded from the final output. The user needs to consider the following trade-off between quality and quantity of the search results. A higher accuracy threshold yields fewer results, but they are likely to be relevant to the user's query. A lower threshold generally yields more results, but they will probably be less relevant to the user's query. It is recommended to experiment with varying degrees of matching accuracy by adjusting the threshold and repeating the same search multiple times to get an idea of the variation implied. In particular, if a certain key word returns zero results, one potential solution is to be "less picky" and try again with a lower threshold.
 }
 \examples{
+\dontrun{
 # look for variable(s) called "total consumption", which...
 # ... were collected between 2000 and 2019,
 # ... form part of data from nigeria, south africa, or vietnam,
@@ -61,4 +62,5 @@ example <- WBquery(
                access = c("open", "public"),
                accuracy = 0.6
            )
+}
 }

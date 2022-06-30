@@ -21,7 +21,9 @@
 #' @return `WBquery()` returns a nested list of results by key word, each consisting of tibbles that contain the library items' unique identifier (idno), matching variables, their labels and matching scores.
 #' @export
 #'
-#' @examples # look for variable(s) called "total consumption", which...
+#' @examples
+#' \dontrun{
+#' # look for variable(s) called "total consumption", which...
 #' # ... were collected between 2000 and 2019,
 #' # ... form part of data from nigeria, south africa, or vietnam,
 #' # ... are open access or public.
@@ -35,6 +37,7 @@
 #'                access = c("open", "public"),
 #'                accuracy = 0.6
 #'            )
+#' }
 
 WBquery <- function(key = "",           # search keys
                     from = "",          # start year of data collection (Integer)
@@ -47,7 +50,6 @@ WBquery <- function(key = "",           # search keys
                     accuracy = 0.5      # set search accuracy (vsm score limit)
                     ){
 
-    # Load the package required to read JSON files.
 
     require(rjson) # to read JSON files
 
@@ -61,11 +63,15 @@ WBquery <- function(key = "",           # search keys
 
     require(pbapply) # add a progress bar to lapply() calls
 
-    # require(future.apply) # parallelized apply functions
-
     require(parallel) # distributed (parallel) computing
 
-    source("R/multi_join.R") # source custom function multi-join()
+    # Define multiple join function.
+
+    multi_join <- function(list_of_loaded_data, join_func){
+        # require("dplyr")
+        output <- Reduce(function(x, y) {join_func(x, y)}, list_of_loaded_data)
+        return(output)
+    }
 
     source("R/vsm_score.R") # source custom scoring function
 
@@ -131,7 +137,15 @@ WBquery <- function(key = "",           # search keys
         require(magrittr)
         require(pbapply)
         require(tidyverse)
-        source("R/multi_join.R")
+
+        # Define multiple join function.
+
+        multi_join <- function(list_of_loaded_data, join_func){
+            require("dplyr")
+            output <- Reduce(function(x, y) {join_func(x, y)}, list_of_loaded_data)
+            return(output)
+        }
+
         source("R/vsm_score.R")
         })
 
@@ -187,6 +201,8 @@ WBquery <- function(key = "",           # search keys
                     "Decrease accuracy threshold or change search parameters to obtain more results."))
             }
             else{
+                message("   ")
+
                 message(paste0(sum(sapply(scores[[k]], nrow)), " result(s) for --",
                                key[k], "-- in ", length(scores[[k]]),
                                " library item(s):"))
@@ -201,6 +217,7 @@ WBquery <- function(key = "",           # search keys
                             100*(round(scores[[k]][[i]]$score[v], digits = 2)),
                             "% match"))
                     }
+                    message("    ")
                 }
             }
         }
@@ -211,3 +228,4 @@ WBquery <- function(key = "",           # search keys
     return(scores) # give output
 
 } # end of WBquery()
+
