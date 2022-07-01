@@ -27,9 +27,9 @@
 
 ## Background
 
-Researchers and practitioners from diverse disciplinary backgrounds - Economics, Public Policy, Development Studies, Sociology, to just name a few - rely on high quality data at the firm, household, and individual level for their work. Typically, these data are collected through survey instruments by national or international organizations, statistical services, or private enterprises. The World Bank Microdata Library is a large and popular repository for this kind of data. At the time of writing, it holds 3864 datasets.
+Researchers and practitioners from diverse disciplinary backgrounds - Economics, Public Policy, Development Studies, Sociology, to just name a few - rely on high quality data at the firm, household, and individual level for their work. Typically, these data are collected through survey instruments by national or international organizations, statistical services, or private enterprises. The [World Bank Microdata Library](https://microdata.worldbank.org/) is a large and popular repository for this kind of data. At the time of writing, it holds 3864 datasets.
 
-Each of these datasets may include thousands of individual variables, all of which are described in the respective survey's codebook.  Browsing through these codebooks one by one to find what you are looking for can consume a lot of time. Automated querying has the potential to greatly reduce this burden and enable researchers to spend more of their time thinking about the big questions they are trying to answer. The World Bank provides its own dedicated API for this purpose. **WBquery** acts as a wrapper for this API and implements a simple work routine for R users to query the Microdata Library for entries of interest.
+Each of these datasets may include thousands of individual variables, all of which are described in the respective survey's codebook.  Browsing through these codebooks one by one to find what you are looking for can consume a lot of time. Automated querying has the potential to greatly reduce this burden and enable researchers to spend more of their time thinking about the big questions they are trying to answer. The World Bank provides a [dedicated API](https://microdata.worldbank.org/api-documentation/catalog/index.html#) for this purpose. **WBquery** acts as a wrapper for this API and implements a simple work routine for R users to query the Microdata Library for entries of interest.
 
 Note that via the API, users can query for collections, datasets, and specific variables that match (and *exactly* match) the search parameters provided. Because labelling of variables varies widely from survey to survey, exact matches will only return a subset of those entries relevant to the researcher. **WBqueryR** solves this problem as it implements a vector-space-model (VSM) based search engine that scores variable labels for the presence of key words provided by the user.
 
@@ -114,7 +114,7 @@ Typing `y` into the console will print the summary, whereas `n` will not. Let us
 
 </details>
 
-Note that no matter whether you chose to display the summary or not, a summary table with all the information necessary to find the data later has been assigned to the new R-object `my_example` in your environment. This object is a list of 2 items - one for each key word - and each of these items includes tibbles of varying sizes that correspond to the datasets in the Microdata Library for which results have been found. Every tibble includes information on the variables: their name, label, and matching score. Type the code below to inspect the structure of `my_example` in R.
+Note that no matter whether you choose to display the summary or not, all the information necessary to find the data later has been assigned to the new R-object `my_example` in your environment. This object is a list of 2 items - one for each key word - and each of these items includes tibbles of varying sizes that correspond to the datasets in the Microdata Library for which results have been found. Every tibble includes information on the matched variables: their name, label, and matching score. Type the code below to inspect the structure of `my_example` in R.
 
 ``` r
 str(my_example)
@@ -218,6 +218,8 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 ## Installation
 
 ## Details
+
+`WBqueryR::WBquery()` internally calls the helper function `vsm_code()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
 
 ## Development
 
