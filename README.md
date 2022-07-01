@@ -47,7 +47,126 @@ For now, users of the **WBqueryR** package can only engage with one function : `
 
 3. **Return** a list of tibbles for variables with a matching score above the accuracy threshold.
 
+### Example
 
+To illustrate the use of `WBqueryR::WBquery()`, consider the following example. Say you are interested in obtaining data on total consumption and expenditure for households in Nigeria, South Africa, or Vietnam. You are only interested in data that was collected between 2000 and 2019, and which is either in the public domain or else open access. Lastly, you want the results to match your key words at list by 60%. The example below queries the Microdata Library to find data that suits your needs:
+
+``` r
+library(WBqueryR)
+
+my_example <- WBquery(
+    key = c("total consumption", "total expenditure"), # enter your keywords
+    
+    from = 2000,                            # lower time limit
+    to = 2019,                              # upper time limit
+    country = c("nigeria", "zaf", "vnm"),   # specify countries
+    collection = c("lsms"),                 # only look for lsms data
+    access = c("open", "public"),           # specify access
+    accuracy = 0.6                          # set accuracy to 60%
+    )
+```
+
+<details>
+
+<summary>Click to see output</summary>
+
+``` r
+#> gathering codebooks...
+#> scoring for key word 1/2 (total consumption)...
+#> scoring for key word 2/2 (total expenditure)...
+#> Search complete! Print results in the console? (type y for YES, n for NO):
+```
+
+</details>
+
+When `WBqueryR::WBquery()` has completed the search, the user is prompted to decide, whether a summary of the search results should be printed in the console or not.
+Typing `y` into the console will print the summary, whereas `n` will not. Let us see what the summary looks like for the example above:
+
+``` r
+#> Search complete! Print results in the console? (type y for YES, n for NO):y
+```
+
+<details>
+
+<summary>Click to see output</summary>
+
+``` r
+   
+#> 5 result(s) for --total consumption-- in 2 library item(s):
+#>    NGA_2018_GHSP-W4_v03_M
+#>        s7bq2b (CONSUMPTION UNIT) - 67% match
+#>        s7bq2b_os (OTHER CONSUMPTION UNIT) - 63% match
+#>        s7bq2c (CONSUMPTION SIZE) - 61% match
+#>    
+#>    NGA_2015_GHSP-W3_v02_M
+#>        totcons (Total consumption per capita) - 61% match
+#>        totcons (Total consumption per capita) - 61% match
+#>    
+#>   
+#> 3 result(s) for --total expenditure-- in 2 library item(s):
+#>    NGA_2012_GHSP-W2_v02_M
+#>        s2q19i (AGGREGATE EXPENDITURE) - 60% match
+#>    
+#>    NGA_2010_GHSP-W1_v03_M
+#>        s2aq23i (aggregate expenditure) - 61% match
+#>        s2bq14i (aggregate expenditure) - 61% match
+```
+
+</details>
+
+Note that no matter whether you chose to display the summary or not, a summary table with all the information necessary to find the data later has been assigned to the new R-object `my_example` in your environment. This object is a list of 2 items - one for each key word - and each of these items includes tibbles of varying sizes that correspond to the datasets in the Microdata Library for which results have been found. Every tibble includes information on the variables: their name, label, and matching score. Type the code below to inspect the structure of `my_example` in R.
+
+``` r
+str(my_example)
+```
+
+<details>
+
+<summary>Click to see output</summary>
+
+``` r
+#>List of 2
+#> $ total consumption:List of 2
+#>  ..$ NGA_2018_GHSP-W4_v03_M: tibble [3 × 3] (S3: tbl_df/tbl/data.frame)
+#>  .. ..$ doc  : chr [1:3] "s7bq2b" "s7bq2b_os" "s7bq2c"
+#>  .. ..$ score: num [1:3, 1] 0.675 0.629 0.613
+#>  .. .. ..- attr(*, "dimnames")=List of 2
+#>  .. .. .. ..$ : chr [1:3] "s7bq2b" "s7bq2b_os" "s7bq2c"
+#>  .. .. .. ..$ : NULL
+#>  .. ..$ text :List of 3
+#>  .. .. ..$ s7bq2b   : chr "CONSUMPTION UNIT"
+#>  .. .. ..$ s7bq2b_os: chr "OTHER CONSUMPTION UNIT"
+#>  .. .. ..$ s7bq2c   : chr "CONSUMPTION SIZE"
+#>  ..$ NGA_2015_GHSP-W3_v02_M: tibble [2 × 3] (S3: tbl_df/tbl/data.frame)
+#>  .. ..$ doc  : chr [1:2] "totcons" "totcons"
+#>  .. ..$ score: num [1:2, 1] 0.606 0.606
+#>  .. .. ..- attr(*, "dimnames")=List of 2
+#>  .. .. .. ..$ : chr [1:2] "totcons" "totcons"
+#>  .. .. .. ..$ : NULL
+#>  .. ..$ text :List of 2
+#>  .. .. ..$ totcons: chr "Total consumption per capita"
+#>  .. .. ..$ totcons: chr "Total consumption per capita"
+#> $ total expenditure:List of 2
+#>  ..$ NGA_2012_GHSP-W2_v02_M: tibble [1 × 3] (S3: tbl_df/tbl/data.frame)
+#>  .. ..$ doc  : chr "s2q19i"
+#>  .. ..$ score: num [1, 1] 0.601
+#>  .. .. ..- attr(*, "dimnames")=List of 2
+#>  .. .. .. ..$ : chr "s2q19i"
+#>  .. .. .. ..$ : NULL
+#>  .. ..$ text :List of 1
+#>  .. .. ..$ s2q19i: chr "AGGREGATE EXPENDITURE"
+#>  ..$ NGA_2010_GHSP-W1_v03_M: tibble [2 × 3] (S3: tbl_df/tbl/data.frame)
+#>  .. ..$ doc  : chr [1:2] "s2aq23i" "s2bq14i"
+#>  .. ..$ score: num [1:2, 1] 0.61 0.61
+#>  .. .. ..- attr(*, "dimnames")=List of 2
+#>  .. .. .. ..$ : chr [1:2] "s2aq23i" "s2bq14i"
+#>  .. .. .. ..$ : NULL
+#>  .. ..$ text :List of 2
+#>  .. .. ..$ s2aq23i: chr "aggregate expenditure"
+#>  .. .. ..$ s2bq14i: chr "aggregate expenditure"
+```
+
+</details>
 
 ### Parameters for `WBqueryR::WBquery()`
 
@@ -55,18 +174,19 @@ For now, users of the **WBqueryR** package can only engage with one function : `
 
 In summary, the parameters for `WBqueryR::WBquery()` are:
 
-| Parameter     | Description   | Syntax Example| Default       | Type |
-|---------------|---------------|---------------|---------------|------|
-| **key** | a character (string) vector of key words, separated by commas| `key = (...)` | none |*required* |
-| **from** | an integer indicating the minimum year of data collection | `from = ####`| none | *optional* |
-| **to** | an integer, indicating the maximum year of data collection | `to = ####`| none | *optional* |
-| **country** | a character (string) vector of [country name(s) or iso3 codes](http://microdata.worldbank.org/index.php/api/catalog/country_codes), or a mix of both; separated by commas | `country = c(...)` | none | *optional* |
-| **collection** | a character (string) vector including one or more of the microdata library collection identifiers, separated by commas: <table> <thead> <th>Parameter</th> <th>Collection</th> <th># of datasets</th> </thead> <td>`"afrobarometer"`</td> <td>[Afrobarometer](https://www.afrobarometer.org/)</td> <td>32</td> </tr> <tr> <td>`"datafirst"`</td> <td>[DataFirst , University of Cape Town, South Africa](https://www.datafirst.uct.ac.za/)</td> <td>257</td> </tr> <tr> <td>`"dime"`</td> <td>[Development Impact Evaluation (DIME)](https://www.worldbank.org/en/research/dime)</td> <td>35</td> </tr> <tr> <td>`"microdata_rg"`</td> <td>[Development Research Microdata](https://microdata.worldbank.org/index.php/collections/microdata_rg)</td> <td>59</td> </tr> <tr> <td>`"enterprise_surveys"`</td> <td>[Enterprise Surveys](https://www.enterprisesurveys.org/en/enterprisesurveys)</td> <td>566</td> </tr> <tr> <td>`"FCV"`</td> <td>[Fragility, Conflict and Violence](https://www.worldbank.org/en/topic/fragilityconflictviolence/)</td> <td>1011</td> </tr> <tr> <td>`"global-findex"`</td> <td>[Global Financial Inclusion (Global Findex) Database](https://www.worldbank.org/en/publication/globalfindex)</td> <td>436</td> </tr> <tr> <td>`"ghdx"`</td> <td>[Global Health Data Exchange (GHDx), Institute for Health Metrics and Evaluation (IHME)](https://ghdx.healthdata.org/)</td> <td>20</td> </tr> <tr> <td>`"hfps"`</td> <td>[High-Frequency Phone Surveys](https://microdata.worldbank.org/index.php/collections/hfps/about)</td> <td>58</td> </tr> <tr> <td>`"impact_evaluation"`</td> <td>[Impact Evaluation Surveys](https://microdata.worldbank.org/index.php/collections/impact_evaluation)</td> <td>198</td> </tr> <tr> <td>`"ipums"`</td> <td>[Integrated Public Use Microdata Series (IPUMS)](https://www.ipums.org/)</td> <td>431</td> </tr> <tr> <td>`"lsms"`</td> <td>[Living Standards Measurement Study (LSMS)](https://www.worldbank.org/en/programs/lsms)</td> <td>151</td> </tr> <tr> <td>`"dhs"`</td> <td>[MEASURE DHS: Demographic and Health Surveys](https://dhsprogram.com/)</td> <td>362</td> </tr> <tr> <td>`"mrs"`</td> <td>[Migration and Remittances Surveys](https://microdata.worldbank.org/index.php/collections/mrs)</td> <td>9</td> </tr> <tr> <td>`"MCC"`</td> <td>[Millennium Challenge Corporation (MCC)](https://www.mcc.gov/)</td> <td>39</td> </tr> <tr> <td>`"pets"`</td> <td>[Service Delivery Facility Surveys](https://microdata.worldbank.org/index.php/collections/pets)</td> <td>13</td> </tr> <tr> <td>`"sdi"`</td> <td>[Service Delivery Indicators](https://www.sdindicators.org/)</td> <td>19</td> </tr> <tr> <td>`"step"`</td> <td>[The STEP Skills Measurement Program](https://microdata.worldbank.org/index.php/collections/step)</td> <td>22</td> </tr> <tr> <td>`"sief"`</td> <td>[The Strategic Impact Evaluation Fund (SIEF)](https://microdata.worldbank.org/index.php/collections/sief)</td> <td>38</td> </tr> <tr> <td>`"COS"`</td> <td>[The World Bank Group Country Opinion Survey Program (COS)](https://countrysurveys.worldbank.org/)</td> <td>343</td> </tr> <tr> <td>`"MICS"`</td> <td>[UNICEF Multiple Indicator Cluster Surveys (MICS)](https://mics.unicef.org/)</td> <td>221</td> </tr> <tr> <td>`"unhcr"`</td> <td>[United Nations Refugee Agency (UNHCR)](https://www.unhcr.org/data.html)</td>  <td>269</td> </tr> <tr> <td>`"WHO"`</td> <td>WHO’s [Multi-Country Studies Programmes](https://microdata.worldbank.org/index.php/collections/WHO)</td> <td>72</td> </tr> </table>  | `collection = c(...)` | `"lsms"`| *optional* |
-| **access** | an optional character (string) vector indicating the desired type(s) of access rights; one or more of: `"open"`, `"public"`, `"direct"`, `"remote"`, `"licensed"`; separated by commas| `access = c(...)` | none| *optional* |
-| **sort_by** | a character (string) vector indicating one of: `"rank"`, `"title"`, `"nation"`, `"year"` | `sort_by(...)`| none | *optional* |
-| **sort_order** | a character (string) vector indicating ascending or descending sort order by one of: `"asc"`, `"desc"`| `sort_order(...)` | none | *optional* |
-| **accuracy** | a real number between 0 and 1, indicating the desired level of scoring accuracy | `accuracy = #` | `0.5` | *optional* |
+| Parameter     | Syntax Example | Default       | Type | Description   |
+|---------------|----------------|---------------|------|---------------|
+| **key** | `key = (...)` | none |*required* | a character (string) vector of key words, separated by commas|
+| **from** | `from = ####`| none | *optional* | an integer indicating the minimum year of data collection |
+| **to** | `to = ####`| none | *optional* | an integer, indicating the maximum year of data collection |
+| **country** | `country = c(...)` | none | *optional* | a character (string) vector of [country name(s) or iso3 codes](http://microdata.worldbank.org/index.php/api/catalog/country_codes), or a mix of both; separated by commas |
+| **collection** | `collection = c(...)` | `"lsms"`| *optional* | a character (string) vector including one or more of the microdata library collection identifiers, separated by commas: <p></p><table> <thead> <th>String</th> <th>Collection title</th> <th># of datasets</th> </thead> <td>`"afrobarometer"`</td> <td>[Afrobarometer](https://www.afrobarometer.org/)</td> <td>32</td> <tr> <td>`"datafirst"`</td> <td>[DataFirst , University of Cape Town, South Africa](https://www.datafirst.uct.ac.za/)</td> <td>257</td> </tr> <tr> <td>`"dime"`</td> <td>[Development Impact Evaluation (DIME)](https://www.worldbank.org/en/research/dime)</td> <td>35</td> </tr> <tr> <td>`"microdata_rg"`</td> <td>[Development Research Microdata](https://microdata.worldbank.org/index.php/collections/microdata_rg)</td> <td>59</td> </tr> <tr> <td>`"enterprise_surveys"`</td> <td>[Enterprise Surveys](https://www.enterprisesurveys.org/en/enterprisesurveys)</td> <td>566</td> </tr> <tr> <td>`"FCV"`</td> <td>[Fragility, Conflict and Violence](https://www.worldbank.org/en/topic/fragilityconflictviolence/)</td> <td>1011</td> </tr> <tr> <td>`"global-findex"`</td> <td>[Global Financial Inclusion (Global Findex) Database](https://www.worldbank.org/en/publication/globalfindex)</td> <td>436</td> </tr> <tr> <td>`"ghdx"`</td> <td>[Global Health Data Exchange (GHDx), Institute for Health Metrics and Evaluation (IHME)](https://ghdx.healthdata.org/)</td> <td>20</td> </tr> <tr> <td>`"hfps"`</td> <td>[High-Frequency Phone Surveys](https://microdata.worldbank.org/index.php/collections/hfps/about)</td> <td>58</td> </tr> <tr> <td>`"impact_evaluation"`</td> <td>[Impact Evaluation Surveys](https://microdata.worldbank.org/index.php/collections/impact_evaluation)</td> <td>198</td> </tr> <tr> <td>`"ipums"`</td> <td>[Integrated Public Use Microdata Series (IPUMS)](https://www.ipums.org/)</td> <td>431</td> </tr> <tr> <td>`"lsms"`</td> <td>[Living Standards Measurement Study (LSMS)](https://www.worldbank.org/en/programs/lsms)</td> <td>151</td> </tr> <tr> <td>`"dhs"`</td> <td>[MEASURE DHS: Demographic and Health Surveys](https://dhsprogram.com/)</td> <td>362</td> </tr> <tr> <td>`"mrs"`</td> <td>[Migration and Remittances Surveys](https://microdata.worldbank.org/index.php/collections/mrs)</td> <td>9</td> </tr> <tr> <td>`"MCC"`</td> <td>[Millennium Challenge Corporation (MCC)](https://www.mcc.gov/)</td> <td>39</td> </tr> <tr> <td>`"pets"`</td> <td>[Service Delivery Facility Surveys](https://microdata.worldbank.org/index.php/collections/pets)</td> <td>13</td> </tr> <tr> <td>`"sdi"`</td> <td>[Service Delivery Indicators](https://www.sdindicators.org/)</td> <td>19</td> </tr> <tr> <td>`"step"`</td> <td>[The STEP Skills Measurement Program](https://microdata.worldbank.org/index.php/collections/step)</td> <td>22</td> </tr> <tr> <td>`"sief"`</td> <td>[The Strategic Impact Evaluation Fund (SIEF)](https://microdata.worldbank.org/index.php/collections/sief)</td> <td>38</td> </tr> <tr> <td>`"COS"`</td> <td>[The World Bank Group Country Opinion Survey Program (COS)](https://countrysurveys.worldbank.org/)</td> <td>343</td> </tr> <tr> <td>`"MICS"`</td> <td>[UNICEF Multiple Indicator Cluster Surveys (MICS)](https://mics.unicef.org/)</td> <td>221</td> </tr> <tr> <td>`"unhcr"`</td> <td>[United Nations Refugee Agency (UNHCR)](https://www.unhcr.org/data.html)</td>  <td>269</td> </tr> <tr> <td>`"WHO"`</td> <td>WHO’s [Multi-Country Studies Programmes](https://microdata.worldbank.org/index.php/collections/WHO)</td> <td>72</td> </tr> </table>  |
+| **access** | `access = c(...)` | none| *optional* | a character (string) vector indicating the desired type(s) of access rights; one or more of: `"open"`, `"public"`, `"direct"`, `"remote"`, `"licensed"`; separated by commas|
+| **sort_by** | `sort_by(...)`| none | *optional* | a character (string) vector indicating one of: `"rank"`, `"title"`, `"nation"`, `"year"` |
+| **sort_order** | `sort_order(...)` | none | *optional* | a character (string) vector indicating ascending or descending sort order by one of: `"asc"`, `"desc"`|
+| **accuracy** | `accuracy = #` | `0.5` | *optional* | a real number between 0 and 1, indicating the desired level of scoring accuracy |
 
+<!--
 #### Collections and Access Types
 
 | Parameter | Collection | # of datasets|
@@ -94,7 +214,7 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 | `"MICS"` | [UNICEF Multiple Indicator Cluster Surveys (MICS)](https://mics.unicef.org/) | 221 |
 | `"unhcr"` | [United Nations Refugee Agency (UNHCR)](https://www.unhcr.org/data.html) | 269 |
 | `"WHO"` | WHO’s [Multi-Country Studies Programmes](https://microdata.worldbank.org/index.php/collections/WHO) | 72 |
-
+-->
 ## Installation
 
 ## Details
