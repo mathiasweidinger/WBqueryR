@@ -219,7 +219,7 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 
 ## Details
 
-`WBqueryR::WBquery()` internally calls the helper function `vsm_code()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+`WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
 
 ## Development
 
