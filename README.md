@@ -252,7 +252,7 @@ devtools::install_github("mathiasweidinger/WBqueryR")
 #> (as 'lib' is unspecified)
 ```
 
- <details>
+ </details>
 
 ## Details
 
