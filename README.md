@@ -217,6 +217,43 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 -->
 ## Installation
 
+As I wrote `WBqueryR` primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, `WBqueryR` might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. YOU HAVE BEEN WARNED 😉
+
+``` r
+# first check if devtools is installed, if not install...
+if (!require("devtools", character.only = TRUE)) {
+    install.packages("devtools", dependencies = TRUE)
+    }
+
+# now install WBqueryR from github...
+devtools::install_github("mathiasweidinger/WBqueryR")
+```
+
+<details>
+<summary>Click to see output</summary>
+
+``` r
+#> Downloading GitHub repo mathiasweidinger/WBqueryR@HEAD
+#> rlang (1.0.2 -> 1.0.3) [CRAN]
+#> Installing 1 packages: rlang
+#> Installing package into 'C:/Users/mweidinger/AppData/Local/R/win-library/4.2'
+#> (as 'lib' is unspecified)
+#> 
+#> The downloaded binary packages are in
+#>  C:\Users\mweidinger\AppData\Local\Temp\RtmpeaDfjL\downloaded_packages
+#>          checking for file 'C:\Users\mweidinger\AppData\Local\Temp\RtmpeaDfjL\remotes460066734547\mathiasweidinger-WBqueryR-1c8ad39/DESCRIPTION' ...     checking for file 'C:\Users\mweidinger\AppData\Local\Temp\RtmpeaDfjL\remotes460066734547\mathiasweidinger-WBqueryR-1c8ad39/DESCRIPTION' ...   ✔  checking for file 'C:\Users\mweidinger\AppData\Local\Temp\RtmpeaDfjL\remotes460066734547\mathiasweidinger-WBqueryR-1c8ad39/DESCRIPTION'
+#>       ─  preparing 'WBqueryR':
+#>    checking DESCRIPTION meta-information ...     checking DESCRIPTION meta-information ...   ✔  checking DESCRIPTION meta-information
+#>       ─  checking for LF line-endings in source and make files and shell scripts
+#>   ─  checking for empty or unneeded directories
+#>       ─  building 'WBqueryR_0.0.0.9000.tar.gz'
+#>      
+#> #> Installing package into 'C:/Users/mweidinger/AppData/Local/R/win-library/4.2'
+#> (as 'lib' is unspecified)
+```
+
+ <details>
+
 ## Details
 
 `WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
