@@ -17,7 +17,7 @@
   <a href="#installation">Installation</a> •
   <a href="#details">Details</a> •
   <a href="#development">Development</a> •
-  <a href="#license">License</a>
+  <a href="#disclaimer">Disclaimer</a>
 
 </div>
 
@@ -260,7 +260,22 @@ devtools::install_github("mathiasweidinger/WBqueryR")
 
 ## Development
 
-## License
+## Disclaimer
+
+### Copyright
+Mathias Weidinger, 2022.
+
+### Licensing
+
+`WBqueryR` is licensed under version 3 of the GNU Public License. To learn what that means for you (the user), please refer to the [license file](https://www.gnu.org/licenses/gpl-3.0.txt); or you can find a a quick guide to GPLv3 [here](https://www.gnu.org/licenses/quick-guide-gplv3.html).
+
+### Copying Permission
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
 
 ## Notes 
 
