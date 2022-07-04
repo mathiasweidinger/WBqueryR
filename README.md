@@ -23,7 +23,7 @@
 
 ## TL;DR
 
-**WBqueryR** is a "brick and mortar" R-package that makes it easy to query the World Bank's Microdata Library for variables from within R. Its main function `WBqueryR::WBquery()` takes user-defined search parameters and a list of keywords as input, downloads codebooks that meet the search criteria, and queries the variable labels in them for the presence of the keywords.
+The R-package **WBqueryR** makes it easy to query the World Bank's Microdata Library for variables from within R. Its main function `WBqueryR::WBquery()` takes user-defined search parameters and a list of keywords as input, downloads codebooks that meet the search criteria, and queries the variable labels in them for the presence of the keywords.
 
 ## Background
 
@@ -217,7 +217,7 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 -->
 ## Installation
 
-As I wrote `WBqueryR` primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, `WBqueryR` might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. YOU HAVE BEEN WARNED 😉
+As I wrote **WBqueryR** primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, it might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. YOU HAVE BEEN WARNED 😉
 
 ``` r
 # first check if devtools is installed, if not install...
@@ -267,7 +267,7 @@ Mathias Weidinger, 2022.
 
 ### Licensing
 
-`WBqueryR` is licensed under version 3 of the GNU Public License. To learn what that means for you (the user), please refer to the [license file](https://www.gnu.org/licenses/gpl-3.0.txt); or you can find a a quick guide to GPLv3 [here](https://www.gnu.org/licenses/quick-guide-gplv3.html).
+**WBqueryR** is licensed under version 3 of the GNU Public License. To learn what that means for you (the user), please refer to the [license file](https://www.gnu.org/licenses/gpl-3.0.txt); or you can find a a quick guide to GPLv3 [here](https://www.gnu.org/licenses/quick-guide-gplv3.html).
 
 ### Copying Permission
 
