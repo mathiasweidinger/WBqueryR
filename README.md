@@ -256,7 +256,43 @@ devtools::install_github("mathiasweidinger/WBqueryR")
 
 ## Details
 
-`WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+`WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on the excellent online tutorials by [Fernando Torres H.](https://rpubs.com/ftoresh/search-engine-Corpus), [Ben Ogorek](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [Suresh Gorakala](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+
+### VSM Basics
+
+To quote [Wikipedia](https://en.wikipedia.org/wiki/Vector_space_model),
+> Vector space model or term vector model is an algebraic model for representing text documents (and any objects, in general) as vectors of identifiers (such as index terms). It is used in information filtering, information retrieval, indexing and relevancy rankings.
+
+The vector space model procedure can be divided in to three stages. The first stage is the document indexing where content bearing terms are extracted from the document text. The second stage is the weighting of the indexed terms to enhance retrieval of document relevant to the user. The last stage ranks the document with respect to the query according to a similarity measure.
+
+In the use case of **WBqueryR**, the variable $j$ labels in the codebooks gathered from the Microdata Library are represented by a vector $d$ and the user-defined keywords by another vector $q$.
+
+$$ d_j = ( w_{1,j} ,w_{2,j} , \dotsc ,w_{t,j} ) $$
+
+$$ q = ( w_{1,q} ,w_{2,q} , \dotsc ,w_{n,q} ) $$
+
+Each dimension corresponds to a separate term. If a term occurs in the document, its value in the vector is non-zero. The definition of term depends on the application. In the present use case, terms are either single words, keywords, or longer phrases. If words are chosen to be the terms, the dimensionality of the vector is the number of words in the vocabulary (the number of distinct words occurring in the corpus).
+
+Vector operations can be used to compare documents with queries. In the case of `vsm_score`, every variable label receives a matching-score $m$ in the unit-interval $\{x \in \mathbf{R} ∣ 0<m<1\}$, indicating how well the label fits the keywords. A score of $m=1$ means that the label _exactly_ matches the keyword. As descibed above, the user can specify a threshold below which results are being discarded. By default, `WBqueryR::WBquery()` only returns variables with $m\geq 0.5$ in its results.
+
+### Limitations (and their relevance)
+
+Borrowing once more from Wikipedia, the commonly acknowledged limitations of VSM include:
+
+1. Long documents are poorly represented because they have poor similarity values (a small scalar product and a large dimensionality)
+2. Search keywords must precisely match document terms; word substrings might result in a "false positive match"
+3. Semantic sensitivity; documents with similar context but different term vocabulary won't be associated, resulting in a "false negative match".
+4. The order in which the terms appear in the document is lost in the vector space representation.
+5. Theoretically assumes terms are statistically independent.
+6. Weighting is intuitive but not very formal.
+
+Luckily, some of these limitations do not immediately cause issues in the use-case of WBqueryR. Limitation 1 is rather insignicant since variable labels rarely exceed a single sentence. As for limitation 2, I suspect that most users would use full words - not substrings thereof - to query for variable names.
+
+Limitation 3 might cause problems for WBqueryR. It is perhaps wise to include closely related words to ensure that as many relevant variables as possible are found and retrieved. For example, when looking for variables on expenditure, one might add the closely related term "expenses" to make sure variables containing it in their description are scored accurately:
+
+``` r
+WBqueryR::WBquery(key = c("expenditure", "expenses"))
+```
 
 ## Development
 
