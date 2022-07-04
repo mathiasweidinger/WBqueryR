@@ -298,9 +298,15 @@ WBqueryR::WBquery(key = c("expenditure", "expenses"))
 
 Limitation 4 is not an issue at all; in fact, the order in which the terms appear in the variable labels *should* not, ex ante, affect the value of the matching score assigned by `vsm-score()`. The flexibility of matching key words with labels that are *not* exactly in the same order was the primary reason for choosing the VSM framework over simply pattern-matching strings with one another (e.g. using [`grep()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) in base-R).
 
-Lastly, limitations 5 and 6 are acknowledged but considering the simplicity of the task at hand, more computationally intensive methods that would have resolved their concerns, are hardly necessary in the present use-scenario.
+Lastly, limitations 5 and 6 are acknowledged. There are more computationally intensive methods that would have resolved these concerns. However, considering how simple the task at hand really is, implementing them for the sake of querying variable labels seemed a little excessive to me.
 
 ## Development
+
+This section scatches directions for future developments of WBqueryR() in terms of features and usability. If you have ideas or constructive criticism, feel free to submit a [feature request](https://github.com/mathiasweidinger/WBqueryR/issues). From there, I will sporadically update this list.
+
+### Datascraping
+
+In its current form. `WBquery` only yields a summary of where (specifically, _in which datasets_) the data searched by the user can be found. To me, the most obvious useful addition to `WBqueryR` would be to give it the capability to scrape the Microdata Library and download the actual datasets onto the user's system. I might work away on this over the summer of 2022 - no promises quite yet, though! 
 
 ## Disclaimer
 
