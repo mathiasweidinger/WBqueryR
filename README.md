@@ -273,7 +273,11 @@ $$ q = ( w_{1,q} ,w_{2,q} , \dotsc ,w_{n,q} ) $$
 
 Each dimension corresponds to a separate term. If a term occurs in the document, its value in the vector is non-zero. The definition of term depends on the application. In the present use case, terms are either single words, keywords, or longer phrases. If words are chosen to be the terms, the dimensionality of the vector is the number of words in the vocabulary (the number of distinct words occurring in the corpus).
 
-Vector operations can be used to compare documents with queries. In the case of `vsm_score`, every variable label receives a matching-score $m$ in the unit-interval $\{x \in \mathbf{R} ∣ 0<m<1\}$, indicating how well the label fits the keywords. A score of $m=1$ means that the label _exactly_ matches the keyword. As descibed above, the user can specify a threshold below which results are being discarded. By default, `WBqueryR::WBquery()` only returns variables with $m\geq 0.5$ in its results.
+Vector operations can be used to compare documents with queries. In the case of `vsm_score`, every variable label receives a matching-score $m$ in the unit-interval,
+
+$$ m \in \mathbb{R} \mid 0 \leq m \leq 1, $$
+ 
+indicating how well the label fits the keywords. A score of $m=1$ means that the label _exactly_ matches the keyword. As descibed above, the user can specify a threshold below which results are being discarded. By default, `WBqueryR::WBquery()` only returns variables with $m\geq 0.5$ in its results.
 
 ### Limitations (and their relevance)
 
@@ -286,13 +290,15 @@ Borrowing once more from Wikipedia, the commonly acknowledged limitations of VSM
 5. Theoretically assumes terms are statistically independent.
 6. Weighting is intuitive but not very formal.
 
-Luckily, some of these limitations do not immediately cause issues in the use-case of WBqueryR. Limitation 1 is rather insignicant since variable labels rarely exceed a single sentence. As for limitation 2, I suspect that most users would use full words - not substrings thereof - to query for variable names.
-
-Limitation 3 might cause problems for WBqueryR. It is perhaps wise to include closely related words to ensure that as many relevant variables as possible are found and retrieved. For example, when looking for variables on expenditure, one might add the closely related term "expenses" to make sure variables containing it in their description are scored accurately:
+Luckily, some of these limitations do not immediately cause issues for WBqueryR. Limitation 1 is rather insignicant since variable labels rarely exceed a single sentence. As for limitation 2, I suspect that most users would use full words - not substrings thereof - to query for variable names. Limitation 3 might cause problems for WBqueryR. It is perhaps wise to include closely related words to ensure that as many relevant variables as possible are found and retrieved. For example, when looking for variables on expenditure, one might add the closely related term "expenses" to make sure variables containing it in their description are scored accurately:
 
 ``` r
 WBqueryR::WBquery(key = c("expenditure", "expenses"))
 ```
+
+Limitation 4 is not an issue at all; in fact, the order in which the terms appear in the variable labels *should* not, ex ante, affect the value of the matching score assigned by `vsm-score()`. The flexibility of matching key words with labels that are *not* exactly in the same order was the primary reason for choosing the VSM framework over simply pattern-matching strings with one another (e.g. using [`grep()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) in base-R).
+
+Lastly, limitations 5 and 6 are acknowledged but considering the simplicity of the task at hand, more computationally intensive methods that would have resolved their concerns, are hardly necessary in the present use-scenario.
 
 ## Development
 
