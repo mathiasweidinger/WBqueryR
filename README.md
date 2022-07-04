@@ -302,7 +302,7 @@ Lastly, limitations 5 and 6 are acknowledged. There are more computationally int
 
 ## Development
 
-This section scatches directions for future developments of WBqueryR() in terms of features and usability. If you have ideas or constructive criticism, feel free to submit a [feature request](https://github.com/mathiasweidinger/WBqueryR/issues). From there, I will sporadically update this list.
+This section draws up directions for future developments of **WBqueryR()** in terms of features and usability. If you have ideas or constructive criticism, feel free to submit a [feature request](https://github.com/mathiasweidinger/WBqueryR/issues). From there, I will sporadically update this list.
 
 ### Datascraping
 
