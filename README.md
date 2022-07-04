@@ -306,7 +306,7 @@ This section scatches directions for future developments of WBqueryR() in terms 
 
 ### Datascraping
 
-In its current form. `WBquery` only yields a summary of where (specifically, _in which datasets_) the data searched by the user can be found. To me, the most obvious useful addition to `WBqueryR` would be to give it the capability to scrape the Microdata Library and download the actual datasets onto the user's system. I might work away on this over the summer of 2022 - no promises quite yet, though! 
+In its current form. **WBquery** only yields a summary of where (specifically, _in which datasets_) the data searched by the user can be found. To me, the most obvious useful addition to **WBqueryR** would be to give it the capability to scrape the Microdata Library and download the actual datasets onto the user's system. I might work away on this over the summer of 2022 - no promises quite yet, though! 
 
 ## Disclaimer
 
