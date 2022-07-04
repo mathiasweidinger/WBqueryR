@@ -217,7 +217,7 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 -->
 ## Installation
 
-As I wrote **WBqueryR** primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, it might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. YOU HAVE BEEN WARNED 😉
+As I wrote **WBqueryR** primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, it might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. **YOU HAVE BEEN WARNED** 😉
 
 ``` r
 # first check if devtools is installed, if not install...
