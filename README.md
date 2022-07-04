@@ -265,7 +265,7 @@ To quote [Wikipedia](https://en.wikipedia.org/wiki/Vector_space_model),
 
 The vector space model procedure can be divided in to three stages. The first stage is the document indexing where content bearing terms are extracted from the document text. The second stage is the weighting of the indexed terms to enhance retrieval of document relevant to the user. The last stage ranks the document with respect to the query according to a similarity measure.
 
-In the use case of **WBqueryR**, the variable $j$ labels in the codebooks gathered from the Microdata Library are represented by a vector $d$ and the user-defined keywords by another vector $q$.
+In the use case of **WBqueryR**, the $j$ variable labels in the codebooks gathered from the Microdata Library are represented by a vector $d$ and the user-defined keywords by another vector $q$.
 
 $$ d_j = ( w_{1,j} ,w_{2,j} , \dotsc ,w_{t,j} ) $$
 
