@@ -56,22 +56,7 @@ WBquery <- function(key = "",           # search keys
                     accuracy = 0.5      # set search accuracy (vsm score limit)
                     ){
 
-
-    # require(rjson) # to read JSON files
-    #
-    # require(tm) # text mining
-    #
-    # require(magrittr) # required for double and subset-pipe operators.
-    #
-    # require(tidyverse) # Load the tidyverse suite of packages.
-    #
-    # require(httr) # package to work with APIs
-    #
-    # require(pbapply) # add a progress bar to lapply() calls
-    #
-    # require(parallel) # distributed (parallel) computing
-    #
-    # # Define multiple join function.
+    # Define multiple join function.
 
     multi_join <- function(list_of_loaded_data, join_func){
         output <- Reduce(function(x, y) {join_func(x, y)}, list_of_loaded_data)
@@ -81,9 +66,6 @@ WBquery <- function(key = "",           # search keys
     # Define vsm_score function.
 
     vsm_score <- function(df, query, accuracy = 0.5){
-
-        # require(tm)
-        # require(dplyr)
 
         df %$% labl -> labels
         names(labels) <- df$name
@@ -132,19 +114,15 @@ WBquery <- function(key = "",           # search keys
 
         doc.scores <- t(query.vector) %*% tfidf.matrix
 
-        results.df <- tibble(doc = names(labels), score = t(doc.scores),text = labels)
+        results.df <- tibble(var = names(labels), score = t(doc.scores),labl = labels)
 
         results.df <- results.df[order(results.df$score, decreasing = TRUE), ]
-
 
         results.df %>% filter(score >= accuracy) -> scores    # filter out
 
         return(scores)
     }
     # Process search criteria
-
-    # key <- ifelse(exists("key"),
-    #               paste(key, collapse = "|"), "")
 
     from <- ifelse(exists("from"),
                    paste(from, collapse = ","), "")
@@ -191,8 +169,7 @@ WBquery <- function(key = "",           # search keys
     data <- jsonlite::fromJSON(text)
 
 
-    data %$% result %$% rows %>% tibble %$% # build tibble
-        idno -> items # extract item names
+    data %$% result %$% rows %>% tibble -> items # build tibble
 
     # set number of active cores for parallelization
     parallel::detectCores() %>% parallel::makeCluster() -> cl # detect cores and make clusters
@@ -210,9 +187,6 @@ WBquery <- function(key = "",           # search keys
         # Define vsm_score function.
 
         vsm_score <- function(df, query, accuracy = 0.5){
-
-            # require(tm)
-            # require(dplyr)
 
             df %$% labl -> labels
             names(labels) <- df$name
@@ -261,10 +235,9 @@ WBquery <- function(key = "",           # search keys
 
             doc.scores <- t(query.vector) %*% tfidf.matrix
 
-            results.df <- tibble(doc = names(labels), score = t(doc.scores),text = labels)
+            results.df <- tibble(var = names(labels), score = t(doc.scores),labl = labels)
 
             results.df <- results.df[order(results.df$score, decreasing = TRUE), ]
-
 
             results.df %>% filter(score >= accuracy) -> scores    # filter out
 
@@ -277,8 +250,8 @@ WBquery <- function(key = "",           # search keys
 
     message("gathering codebooks...")
 
-    item_vars <- items
-    names(item_vars) <- unlist(items)
+    item_vars <- items$idno
+    names(item_vars) <- items$idno
 
     item_vars %<>% # start with list of codebooks
         pblapply(. %>% # start parallelized task: for each item...
@@ -300,11 +273,22 @@ WBquery <- function(key = "",           # search keys
                        " (", key[k],")..."))
 
         item_vars %>% pbapply::pblapply(. %>% vsm_score(. , query = key[k],
-                                               accuracy = accuracy),
-                               cl = cl) %>%
+                                                        accuracy = accuracy),
+                                        cl = cl) %>%
             purrr::keep(., ~nrow(.) > 0) -> scores[[k]] # drop empty tibbles
     }
 
+    # merge scores with dataset info
+
+    for (i in 1:length(scores)){
+        names = names(scores[[i]])
+        for (n in 1:length(names)){
+            scores[[i]][[n]]$idno <- names[n]
+            scores[[i]][[n]] %<>% merge(items, by = "idno")
+            scores[[i]][[n]]$labl %<>%  unlist()
+        }
+        rm(names)
+    }
 
     parallel::stopCluster(cl) # switch off clusters
 
@@ -336,8 +320,8 @@ WBquery <- function(key = "",           # search keys
                 for (i in 1:length(scores[[k]])){
                     message(paste0("    ",names(scores[[k]])[[i]]))
                     for (v in 1:nrow(scores[[k]][[i]])){
-                        message(paste0("        ", scores[[k]][[i]]$doc[v],
-                            " (", scores[[k]][[i]]$text[v],") - ",
+                        message(paste0("        ", scores[[k]][[i]]$var[v],
+                            " (", scores[[k]][[i]]$labl[v],") - ",
                             100*(round(scores[[k]][[i]]$score[v], digits = 2)),
                             "% match"))
                     }
@@ -349,6 +333,7 @@ WBquery <- function(key = "",           # search keys
     else{
         Sys.sleep(time = 1) # else do nothing
     }
+
     return(scores) # give output
 
 } # end of WBquery()
