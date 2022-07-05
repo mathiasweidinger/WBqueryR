@@ -311,7 +311,7 @@ In its current form. **WBquery** only yields a summary of where (specifically, _
 ## Disclaimer
 
 ### Copyright
-Mathias Weidinger, 2022.
+[Mathias Weidinger](https://mathiasweidinger.com), 2022.
 
 ### Licensing
 
