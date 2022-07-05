@@ -17,13 +17,13 @@
   <a href="#installation">Installation</a> •
   <a href="#details">Details</a> •
   <a href="#development">Development</a> •
-  <a href="#license">License</a>
+  <a href="#disclaimer">Disclaimer</a>
 
 </div>
 
 ## TL;DR
 
-**WBqueryR** is a "brick and mortar" R-package that makes it easy to query the World Bank's Microdata Library for variables from within R. Its main function `WBqueryR::WBquery()` takes user-defined search parameters and a list of keywords as input, downloads codebooks that meet the search criteria, and queries the variable labels in them for the presence of the keywords.
+The R-package **WBqueryR** makes it easy to query the World Bank's Microdata Library for variables from within R. Its main function `WBqueryR::WBquery()` takes user-defined search parameters and a list of keywords as input, downloads codebooks that meet the search criteria, and queries the variable labels in them for the presence of the keywords.
 
 ## Background
 
@@ -217,7 +217,7 @@ In summary, the parameters for `WBqueryR::WBquery()` are:
 -->
 ## Installation
 
-As I wrote `WBqueryR` primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, `WBqueryR` might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snipped below to install it from this github repo. YOU HAVE BEEN WARNED 😉
+As I wrote **WBqueryR** primarily with myself and colleagues in mind, and because it is the first R-package I have ever written, I have no aspiration to get it onto CRAN. Built by an amateur, it might very well "act out" and throw all kinds of errors and bugs at you. If you want to give it a try nonetheless, please use the code snippet below to install it from this github repo. **YOU HAVE BEEN WARNED** 😉
 
 ``` r
 # first check if devtools is installed, if not install...
@@ -256,11 +256,74 @@ devtools::install_github("mathiasweidinger/WBqueryR")
 
 ## Details
 
-`WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on multiple online tutorials, some of which can be found [here](https://rpubs.com/ftoresh/search-engine-Corpus), [here](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [here](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+`WBqueryR::WBquery()` internally calls the helper function `vsm_score()` to score the labels from the codebooks for the presence of the user-defined key words in the parameter `key`. `vsm_score()` is a custom-built function that implements a simple vector-space-model. It is broadly based on the excellent online tutorials by [Fernando Torres H.](https://rpubs.com/ftoresh/search-engine-Corpus), [Ben Ogorek](https://www.r-bloggers.com/2013/03/build-a-search-engine-in-20-minutes-or-less/), and [Suresh Gorakala](https://gist.github.com/sureshgorakala/c990c3cd681b7cecdf57ef8a2ce42005).
+
+### VSM Basics
+
+To quote [Wikipedia](https://en.wikipedia.org/wiki/Vector_space_model),
+> Vector space model or term vector model is an algebraic model for representing text documents (and any objects, in general) as vectors of identifiers (such as index terms). It is used in information filtering, information retrieval, indexing and relevancy rankings.
+
+The vector space model procedure can be divided in to three stages. The first stage is the document indexing where content bearing terms are extracted from the document text. The second stage is the weighting of the indexed terms to enhance retrieval of document relevant to the user. The last stage ranks the document with respect to the query according to a similarity measure.
+
+In the use case of **WBqueryR**, the $j$ variable labels in the codebooks gathered from the Microdata Library are represented by a vector $d$ and the user-defined keywords by another vector $q$.
+
+$$ d_j = ( w_{1,j} ,w_{2,j} , \dotsc ,w_{t,j} ) $$
+
+$$ q = ( w_{1,q} ,w_{2,q} , \dotsc ,w_{n,q} ) $$
+
+Each dimension corresponds to a separate term. If a term occurs in the document, its value in the vector is non-zero. The definition of term depends on the application. In the present use case, terms are either single words, keywords, or longer phrases. If words are chosen to be the terms, the dimensionality of the vector is the number of words in the vocabulary (the number of distinct words occurring in the corpus).
+
+Vector operations can be used to compare documents with queries. In the case of `vsm_score`, every variable label receives a matching-score $m$ in the unit-interval,
+
+$$ m \in \mathbb{R} \mid 0 \leq m \leq 1, $$
+ 
+indicating how well the label fits the keywords. A score of $m=1$ means that the label _exactly_ matches the keyword. As descibed above, the user can specify a threshold below which results are being discarded. By default, `WBqueryR::WBquery()` only returns variables with $m\geq 0.5$ in its results.
+
+### Limitations (and their relevance)
+
+Borrowing once more from Wikipedia, the commonly acknowledged limitations of VSM include:
+
+1. Long documents are poorly represented because they have poor similarity values (a small scalar product and a large dimensionality)
+2. Search keywords must precisely match document terms; word substrings might result in a "false positive match"
+3. Semantic sensitivity; documents with similar context but different term vocabulary won't be associated, resulting in a "false negative match".
+4. The order in which the terms appear in the document is lost in the vector space representation.
+5. Theoretically assumes terms are statistically independent.
+6. Weighting is intuitive but not very formal.
+
+Luckily, some of these limitations do not immediately cause issues for WBqueryR. Limitation 1 is rather insignicant since variable labels rarely exceed a single sentence. As for limitation 2, I suspect that most users would use full words - not substrings thereof - to query for variable names. Limitation 3 might cause problems for WBqueryR. It is perhaps wise to include closely related words to ensure that as many relevant variables as possible are found and retrieved. For example, when looking for variables on expenditure, one might add the closely related term "expenses" to make sure variables containing it in their description are scored accurately:
+
+``` r
+WBqueryR::WBquery(key = c("expenditure", "expenses"))
+```
+
+Limitation 4 is not an issue at all; in fact, the order in which the terms appear in the variable labels *should* not, ex ante, affect the value of the matching score assigned by `vsm-score()`. The flexibility of matching key words with labels that are *not* exactly in the same order was the primary reason for choosing the VSM framework over simply pattern-matching strings with one another (e.g. using [`grep()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) in base-R).
+
+Lastly, limitations 5 and 6 are acknowledged. There are more computationally intensive methods that would have resolved these concerns. However, considering how simple the task at hand really is, implementing them for the sake of querying variable labels seemed a little excessive to me.
 
 ## Development
 
-## License
+This section draws up directions for future developments of **WBqueryR()** in terms of features and usability. If you have ideas or constructive criticism, feel free to submit a [feature request](https://github.com/mathiasweidinger/WBqueryR/issues). From there, I will sporadically update this list.
+
+### Datascraping
+
+In its current form. **WBquery** only yields a summary of where (specifically, _in which datasets_) the data searched by the user can be found. To me, the most obvious useful addition to **WBqueryR** would be to give it the capability to scrape the Microdata Library and download the actual datasets onto the user's system. I might work away on this over the summer of 2022 - no promises quite yet, though! 
+
+## Disclaimer
+
+### Copyright
+[Mathias Weidinger](https://mathiasweidinger.com), 2022.
+
+### Licensing
+
+**WBqueryR** is licensed under version 3 of the GNU Public License. To learn what that means for you (the user), please refer to the [license file](https://www.gnu.org/licenses/gpl-3.0.txt); or you can find a a quick guide to GPLv3 [here](https://www.gnu.org/licenses/quick-guide-gplv3.html).
+
+### Copying Permission
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
 
 ## Notes 
 
