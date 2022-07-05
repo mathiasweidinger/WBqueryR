@@ -67,9 +67,6 @@ WBquery <- function(key = "",           # search keys
 
     vsm_score <- function(df, query, accuracy = 0.5){
 
-        # require(tm)
-        # require(dplyr)
-
         df %$% labl -> labels
         names(labels) <- df$name
         N.labels <- length(labels)
@@ -190,9 +187,6 @@ WBquery <- function(key = "",           # search keys
         # Define vsm_score function.
 
         vsm_score <- function(df, query, accuracy = 0.5){
-
-            # require(tm)
-            # require(dplyr)
 
             df %$% labl -> labels
             names(labels) <- df$name
