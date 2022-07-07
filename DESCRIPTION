@@ -14,7 +14,9 @@ Imports:
     httr,
     jsonlite,
     magrittr,
+    netstat,
     parallel,
     pbapply,
     purrr,
+    RSelenium,
     tm
