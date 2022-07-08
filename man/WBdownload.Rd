@@ -2,7 +2,7 @@
 % Please edit documentation in R/WBdownload.R
 \name{WBdownload}
 \alias{WBdownload}
-\title{Title}
+\title{WBdownload}
 \usage{
 WBdownload(
   item.id,
@@ -34,7 +34,7 @@ WBdownload(
 This function does not return any element.
 }
 \description{
-Title
+A custom-function to download the \code{.csv} data files associated with a single item listed in the Microdata Library.
 }
 \examples{
 \dontrun{

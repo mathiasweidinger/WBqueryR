@@ -1,4 +1,6 @@
-#' Title
+#' WBget
+#'
+#' A wrapper function around `WBdownload` to batch-download `.csv` data files, associated with individual items listed in the Microdata Library, based on a list of numeric ids (e.g. obtained from `WBquery`).
 #'
 #' @param ids_list a list of numerical idns, perhaps from `WBquery()` output
 #' @param dir local directory to store the downloads (default is current working directory)

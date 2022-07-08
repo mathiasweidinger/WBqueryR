@@ -1,5 +1,3 @@
-# initiate WBquery()
-
 #' WBquery
 #'
 #' A custom function that queries the World Bank's Micro Data Library catalogue for items, according to search criteria specified by the user.

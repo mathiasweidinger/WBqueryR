@@ -1,11 +1,6 @@
-
-
-
-#### webscrape using Selenium
-# dir defaults to current working directory
-# abstract defaults to Sect. 1.10.32 of Cicero's "de Finibus Bonorum et Malorum"
-
-#' Title
+#' WBdownload
+#'
+#' A custom-function to download the `.csv` data files associated with a single item listed in the Microdata Library.
 #'
 #' @param item.id unique numeric identifier for a WB Microdata Library item.
 #' @param dir a directory on the local machine to write files to (default is `getwd()`).

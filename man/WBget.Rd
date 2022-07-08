@@ -2,7 +2,7 @@
 % Please edit documentation in R/WBget.R
 \name{WBget}
 \alias{WBget}
-\title{Title}
+\title{WBget}
 \usage{
 WBget(
   ids_list,
@@ -31,7 +31,7 @@ WBget(
 returns a list of directories where the data has been stored
 }
 \description{
-Title
+A wrapper function around \code{WBdownload} to batch-download \code{.csv} data files, associated with individual items listed in the Microdata Library, based on a list of numeric ids (e.g. obtained from \code{WBquery}).
 }
 \examples{
 \dontrun{
