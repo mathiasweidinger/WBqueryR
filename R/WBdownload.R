@@ -34,7 +34,7 @@ WBdownload <- function(
         item.id,
         dir = getwd(),
         unzip = TRUE,
-        dest = paste(item.id,"_wbdl_",format(Sys.time(), "%d_%b_%Y_%H_%M")),
+        dest = paste0(item.id,"_wbdl_",format(Sys.time(), "%d_%b_%Y_%H_%M")),
         user.email,
         user.password,
         user.abstract = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
@@ -113,75 +113,83 @@ WBdownload <- function(
     # wait 10 sec
     Sys.sleep(10)
 
-    # find download button for CSV
-    download_button <- remDR$findElement(using = 'xpath',
-                                         '//a[contains(@title, "_CSV.zip")]')
-    # get download link
-    download_button$getElementAttribute("href") -> dl_add
+    # if there is an abstract required...
+    if(length(remDR$findElements(using = 'xpath',
+                                 '//a[contains(@title, "_CSV.zip")]'))!=0){
+        # find download button for CSV
+        download_button <- remDR$findElement(using = 'xpath',
+                                             '//a[contains(@title, "_CSV.zip")]')
+        # get download link
+        download_button$getElementAttribute("href") -> dl_add
 
-    #### SAVE THE DOWNLOADS (USING ONE OF TWO OPTIONS)
+        #### SAVE THE DOWNLOADS (USING ONE OF TWO OPTIONS)
 
-    ### OPTION 1 - save in temporary directory:
+        ### OPTION 1 - save in temporary directory:
 
-    # # create temporary directory
-    # temp <- tempdir()
-    #
-    # # download zip file to temporary directory
-    # download.file(url = dl_add[[1]], destfile = paste0(temp,"/",4444, "wbget.zip"), mode = "wb")
-    #
-    # # see content of temporary directory
-    # list.files(temp) # one zip file
-    #
-    # # unzip downloads
-    # unzip(paste0(temp,"/",4444, "wbget.zip"), exdir = paste0(temp,"/",4444, "wbget"))
-    #
-    # # inspect unzipped files
-    # list.files(paste0(temp,"/",4444, "wbget")) # one zip file
-    #
-    # # INSERT USE OF DATA HERE...
-    #
-    # # delete temporary directory
-    # unlink(temp)
+        # # create temporary directory
+        # temp <- tempdir()
+        #
+        # # download zip file to temporary directory
+        # download.file(url = dl_add[[1]], destfile = paste0(temp,"/",4444, "wbget.zip"), mode = "wb")
+        #
+        # # see content of temporary directory
+        # list.files(temp) # one zip file
+        #
+        # # unzip downloads
+        # unzip(paste0(temp,"/",4444, "wbget.zip"), exdir = paste0(temp,"/",4444, "wbget"))
+        #
+        # # inspect unzipped files
+        # list.files(paste0(temp,"/",4444, "wbget")) # one zip file
+        #
+        # # INSERT USE OF DATA HERE...
+        #
+        # # delete temporary directory
+        # unlink(temp)
 
 
-    ### OPTION 2 - save in permanent, user-indicated directory
+        ### OPTION 2 - save in permanent, user-indicated directory
 
-    # paste together zip-file name
-    dl_file <- paste0(dir,"/",dest, ".zip")
+        # paste together zip-file name
+        dl_file <- paste0(dir,"/",dest, ".zip")
 
-    # download zipped data folder
-    download.file(url = dl_add[[1]], destfile = dl_file, mode = "wb")
+        # download zipped data folder
+        download.file(url = dl_add[[1]], destfile = dl_file, mode = "wb")
 
-    if (unzip == FALSE){
-        message(paste0("SUCCESS: ",item.id," has been downloaded to ",dl_file,"."))
-    } else {
-        message(paste0("unzipping files for item id ",item.id,"..."))
-        unz_dir <- paste0(dir,"/",dest)
-        dir.create(file.path(unz_dir))
-        # unzip data files into download directory
-        unzip(dl_file, exdir = unz_dir)
-        file.remove(dl_file)
-        message(paste0("SUCCESS: ",item.id," has been downloaded and unzipped to ", unz_dir,"."))
-    }
+        if (unzip == FALSE){
+            message(paste0("SUCCESS: ",item.id," has been downloaded to ",dl_file,"."))
+        } else {
+            message(paste0("unzipping files for item id ",item.id,"..."))
+            unz_dir <- paste0(dir,"/",dest)
+            dir.create(file.path(unz_dir))
+            # unzip data files into download directory
+            unzip(dl_file, exdir = unz_dir)
+            file.remove(dl_file)
+            message(paste0("SUCCESS: ",item.id," has been downloaded and unzipped to ", unz_dir,"."))
+        }
 
-    ### close server
+        ### close server
 
-    remDR$closeWindow()
+        remDR$closeWindow()
 
-    rs_driver_object <- rs_driver_object$server$stop()
+        rs_driver_object <- rs_driver_object$server$stop()
 
-    remDR$closeall()
+        remDR$closeall()
 
-    # kill java and Chromedriver to finish task
-    message("terminating background processes...")
+        # kill java and Chromedriver to finish task
+        message("terminating background processes...")
 
-    system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
-    system("taskkill /F /IM ChromeDriver.exe", intern=FALSE, ignore.stdout=FALSE)
-    message("End of WBdownload cycle")
+        system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+        system("taskkill /F /IM ChromeDriver.exe", intern=FALSE, ignore.stdout=FALSE)
+        message("End of WBdownload cycle")
 
-    if (unzip == FALSE){
-        return(dl_file)
-    } else {
-        return(unz_dir)
+        if (unzip == FALSE){
+            return(dl_file)
+        } else {
+            return(unz_dir)
+        }
+
+    } else{
+        message(paste0("ERROR: download of ", item.id," unsuccessful."))
+        return(paste0("ERROR: download of ", item.id," unsuccessful."))
     }
 }
