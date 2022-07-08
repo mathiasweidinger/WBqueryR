@@ -189,6 +189,19 @@ WBdownload <- function(
         }
 
     } else{
+        ### close server
+
+        remDR$closeWindow()
+
+        rs_driver_object <- rs_driver_object$server$stop()
+
+        remDR$closeall()
+
+        # kill java and Chromedriver to finish task
+        message("terminating background processes...")
+
+        system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+        system("taskkill /F /IM ChromeDriver.exe", intern=FALSE, ignore.stdout=FALSE)
         message(paste0("ERROR: download of ", item.id," unsuccessful."))
         return(paste0("ERROR: download of ", item.id," unsuccessful."))
     }
