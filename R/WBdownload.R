@@ -182,5 +182,4 @@ WBdownload <- function(
     system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
     system("taskkill /F /IM ChromeDriver.exe", intern=FALSE, ignore.stdout=FALSE)
     message("End of WBdownload cycle")
-
 }
