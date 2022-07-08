@@ -10,6 +10,7 @@
 #' @param item.id unique numeric identifier for a WB Microdata Library item.
 #' @param dir a directory on the local machine to write files to (default is `getwd()`).
 #' @param unzip a logical indicating whether downloads should be unzipped (default is `TRUE`).
+#' @param dest name of the folder in `dir` containing the downloads (default is `paste0(item_id,"_wbdl_",format(Sys.time(), "%d_%b_%Y_%H_%M"))`).
 #' @param user.email a valid email address associated with a registered user account at the WB Microdata Library.
 #' @param user.password a valid password associated with the same registered user account at the WB Microdata Library as `user.email`.
 #' @param user.abstract a short description of the purpose for which the data is being downloaded (defaults to Sect. 1.10.32 of M.T. Cicero's "de Finibus Bonorum et Malorum" as a placeholder).
@@ -24,7 +25,7 @@
 #'user.email = "user@example.com",
 #'user.password = "a.VerY_DiffiCULT-PasSWoRD",
 #'user.abstract = "Writing a very innovative paper on something rather important."
-#'dir = "C:/Users/myusername/Desktop/",
+#'dir = "C:/Users/myusername/Desktop",
 #'unzip = FALSE)
 #'}
 #'
@@ -33,6 +34,7 @@ WBdownload <- function(
         item.id,
         dir = getwd(),
         unzip = TRUE,
+        dest = paste(item.id,"_wbdl_",format(Sys.time(), "%d_%b_%Y_%H_%M")),
         user.email,
         user.password,
         user.abstract = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
@@ -144,28 +146,22 @@ WBdownload <- function(
 
     ### OPTION 2 - save in permanent, user-indicated directory
 
-    # paste together a directory for the download
-    dl_dir <- paste0(dir,"wbget_",format(Sys.time(), "%d_%b_%Y_%H_%M"))
-
-    # create download directory
-    dir.create(file.path(dl_dir))
-
     # paste together zip-file name
-    dl_file <- paste0(dl_dir,"/wb",item.id, ".zip")
+    dl_file <- paste0(dir,"/",dest, ".zip")
 
     # download zipped data folder
     download.file(url = dl_add[[1]], destfile = dl_file, mode = "wb")
 
     if (unzip == FALSE){
-        message(paste0("SUCCESS: ",item.id," has been downloaded to ",dl_dir,"."))
+        message(paste0("SUCCESS: ",item.id," has been downloaded to ",dl_file,"."))
     } else {
         message(paste0("unzipping files for item id ",item.id,"..."))
-        unz_dir <- paste0(dl_dir,"/","wb",item.id)
+        unz_dir <- paste0(dir,"/",dest)
         dir.create(file.path(unz_dir))
         # unzip data files into download directory
         unzip(dl_file, exdir = unz_dir)
         file.remove(dl_file)
-        message(paste0("SUCCESS: ",item.id," has been downloaded and unzipped to ", dl_dir,"."))
+        message(paste0("SUCCESS: ",item.id," has been downloaded and unzipped to ", unz_dir,"."))
     }
 
     ### close server
@@ -182,4 +178,10 @@ WBdownload <- function(
     system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
     system("taskkill /F /IM ChromeDriver.exe", intern=FALSE, ignore.stdout=FALSE)
     message("End of WBdownload cycle")
+
+    if (unzip == FALSE){
+        return(dl_file)
+    } else {
+        return(unz_dir)
+    }
 }

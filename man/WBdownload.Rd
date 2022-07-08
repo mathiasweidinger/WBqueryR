@@ -8,6 +8,7 @@ WBdownload(
   item.id,
   dir = getwd(),
   unzip = TRUE,
+  dest = paste(item.id, "_wbdl_", format(Sys.time(), "\%d_\%b_\%Y_\%H_\%M")),
   user.email,
   user.password,
  
@@ -20,6 +21,8 @@ WBdownload(
 \item{dir}{a directory on the local machine to write files to (default is \code{getwd()}).}
 
 \item{unzip}{a logical indicating whether downloads should be unzipped (default is \code{TRUE}).}
+
+\item{dest}{name of the folder in \code{dir} containing the downloads (default is \code{paste0(item_id,"_wbdl_",format(Sys.time(), "\%d_\%b_\%Y_\%H_\%M"))}).}
 
 \item{user.email}{a valid email address associated with a registered user account at the WB Microdata Library.}
 
@@ -39,7 +42,7 @@ WBdownload(item.id = 1234,
 user.email = "user@example.com",
 user.password = "a.VerY_DiffiCULT-PasSWoRD",
 user.abstract = "Writing a very innovative paper on something rather important."
-dir = "C:/Users/myusername/Desktop/",
+dir = "C:/Users/myusername/Desktop",
 unzip = FALSE)
 }
 
