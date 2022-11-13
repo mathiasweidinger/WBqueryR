@@ -44,11 +44,6 @@ WBget <- function(ids_list,
                                        unzip = unzip)
                           )
 }
-#
-# sum <- WBget(ids_list = list(4444,408),
-#       user.email = "m.weidinger@student.maastrichtuniversity.nl",
-#       user.password = "MiNh3mACz6yc9Tw",
-#       dir = "C:/Users/spadmin/Desktop",
-#       unzip = T)
+
 
 
